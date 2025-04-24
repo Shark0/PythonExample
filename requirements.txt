@@ -1,0 +1,6 @@
+faiss-cpu~=1.10.0
+numpy~=2.2.4
+sentence-transformers~=4.0.2
+datasets~=3.5.0
+torch~=2.6.0
+transformers~=4.51.0
