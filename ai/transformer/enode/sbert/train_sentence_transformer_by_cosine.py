@@ -2,9 +2,9 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from sentence_transformers import SentenceTransformer, InputExample, losses
 from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
-from erarly_stopping import EarlyStopping
+from ai.transformer.enode.sbert.erarly_stopping import EarlyStopping
 
-class Losses(losses.OnlineContrastiveLoss):
+class Losses(losses.CosineSimilarityLoss):
     def __init__(self, model):
         super().__init__(model)
         self.loss_history = []
@@ -37,21 +37,16 @@ def train_model(model):
         InputExample(texts=[
             "申請2024年公眾假期休息日、因為早前錯過了申請2025年公眾假期休息日的 email、現想申請2025年所有的公眾假期休息更改休息日日設定",
             "更改休息日日設定"], label=1.0),
-        InputExample(texts=["申請年初三（星期五）、年初四（星期六）2日為休息日", "更改休息日日設定"], label=1.0),
-        InputExample(texts=["申請年初三、年初四2日為休息日", "更改休息日日設定"], label=1.0),
+        InputExample(texts=["休息日、申請年初三（星期五）、年初四（星期六）2日為休息日", "更改休息日日設定"], label=1.0),
+        InputExample(texts=["休息日、申請年初三、年初四2日為休息日", "更改休息日日設定"], label=1.0),
         InputExample(texts=["農歷新年假期休息、我司需要申請2025之休息日", "更改休息日日設定"], label=1.0),
         InputExample(texts=["農歷新年假期休息、我司需要申請2023之休息日", "更改休息日日設定"], label=1.0),
-        InputExample(texts=["申請1月28日至2月3日改為非工作日(放假)", "更改休息日日設定"], label=1),
-        InputExample(texts=["申請2月28日至2月23日改為非工作日(放假)", "更改休息日日設定"], label=1),
-        InputExample(texts=["下列日期維休息日", "更改休息日日設定"], label=1),
-        InputExample(texts=["下列日期維休息日不出貨", "更改休息日日設定"], label=1),
-        InputExample(texts=["我想吃冰淇淋", "更改休息日日設定"], label=0),
-        InputExample(texts=["我想打籃球", "更改休息日日設定"], label=0),
-        InputExample(texts=["我2月28日至2月23日要打籃球", "更改休息日日設定"], label=0),
+        InputExample(texts=["申請1月28日至2月3日改為非工作日(放假)", "更改休息日日設定"], label=1.0),
+        InputExample(texts=["申請2月28日至2月23日改為非工作日(放假)", "更改休息日日設定"], label=1.0),
+        InputExample(texts=["下列日期維休息日", "更改休息日日設定"], label=1.0),
+        InputExample(texts=["下列日期維休息日不出貨", "更改休息日日設定"], label=1.0),
     ]
-    train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=5)
 
-    train_loss = Losses(model)
     value_examples = [
         InputExample(texts=["商店休假日期、商店決定於2024年2月26日至2024年3月9日期間進行休假", "更改休息日日設定"],
                      label=1.0),
@@ -59,11 +54,12 @@ def train_model(model):
                      label=1.0),
         InputExample(texts=["申請年初三、年初四2日為休息日", "更改休息日日設定"], label=1.0),
         InputExample(texts=["申請3月28日至4月23日改為非工作日(放假)", "更改休息日日設定"], label=1.0),
-        InputExample(texts=["我想打籃球", "更改休息日日設定"], label=0),
     ]
-    val_evaluator = EmbeddingSimilarityEvaluator.from_input_examples(value_examples, name='val')
-    early_stopping = EarlyStopping(patience=5, min_delta=0.001)
 
+    val_evaluator = EmbeddingSimilarityEvaluator.from_input_examples(value_examples, name='val')
+    train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=3)
+    train_loss = Losses(model)
+    early_stopping = EarlyStopping(patience=5, min_delta=0.001)
     model.fit(
         train_objectives=[(train_dataloader, train_loss)],
         evaluator=val_evaluator,
@@ -76,6 +72,7 @@ def train_model(model):
         model.load_state_dict(early_stopping.best_model_state)
     model.save("./model_support_001-1")
     plot_loss_curve(train_loss.loss_history)
+
 
 def get_trained_model():
     model = SentenceTransformer('./model_support_001-1')
@@ -149,7 +146,6 @@ def cluster(model):
     paired = [{l: s} for l, s in zip(labels, similarity_list)]
     paired_sorted = sorted(paired, key=lambda d: list(d.values())[0], reverse=True)
     print(paired_sorted)
-    print("\n")
 
 def plot_loss_curve(loss_history):
     plt.figure(figsize=(10, 5))
