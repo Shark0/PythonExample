@@ -54,23 +54,23 @@ def recommend_articles(device, model, user_sequence, article_sequences, top_n=5)
 
 def main():
     #user_sequence:["toy", "food", "pet"]
-    #article_sequence: toy = 0, food = 1, pet = 2, travel = 3
+    #article_sequence:["toy", "food", "pet", travel]
     data = [
-        {"user_sequence": [1, 1, 0], "article_sequence": [0, 1], "label": 1},
-        {"user_sequence": [1, 1, 0], "article_sequence": [1, 3], "label": 1},
-        {"user_sequence": [1, 1, 0], "article_sequence": [2, 2], "label": 0},
-        {"user_sequence": [0, 1, 1], "article_sequence": [2, 3], "label": 1},
-        {"user_sequence": [0, 1, 1], "article_sequence": [1, 1], "label": 1},
-        {"user_sequence": [0, 1, 1], "article_sequence": [0, 1], "label": 0},
-        {"user_sequence": [0, 1, 1], "article_sequence": [0, 0], "label": 0},
+        {"user_sequence": [1, 1, 0], "article_sequence": [0, 1, 0, 0], "label": 1},
+        {"user_sequence": [1, 1, 0], "article_sequence": [1, 0, 1, 0], "label": 1},
+        {"user_sequence": [1, 1, 0], "article_sequence": [0, 0, 1, 0], "label": 0},
+        {"user_sequence": [0, 1, 1], "article_sequence": [0, 0, 1, 1], "label": 1},
+        {"user_sequence": [0, 1, 1], "article_sequence": [0, 1, 0, 0], "label": 1},
+        {"user_sequence": [0, 1, 1], "article_sequence": [1, 1, 0, 0], "label": 0},
+        {"user_sequence": [0, 1, 1], "article_sequence": [1, 0, 0, 0], "label": 0},
     ]
     dataset = RecommendationDataset(data)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     device = generate_device()
     model = generate_model(device)
     train_model(device, model, dataloader)
-    user_sequence = [0, 0, 1]  # electronics, electronics, fashion
-    article_sequences = [[0, 1], [2, 3], [0, 2]]  # 文章標籤
+    user_sequence = [0, 1, 0]
+    article_sequences = [[1, 1, 0, 0], [0, 0, 1, 1], [1, 0, 1, 0]]  # 文章標籤
     top_articles = recommend_articles(device, model, user_sequence, article_sequences, top_n=2)
     print(f"Recommended article indices: {top_articles}")
 
