@@ -1,0 +1,18 @@
+import torch
+from torch.utils.data import Dataset
+
+
+class RecommendationDataset(Dataset):
+    def __init__(self, data):
+        self.data = data
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        item = self.data[idx]
+        return {
+            "user_sequence": torch.tensor(item["user_sequence"], dtype=torch.long),
+            "article_sequence": torch.tensor(item["article_sequence"], dtype=torch.long),
+            "label": torch.tensor(item["label"], dtype=torch.float)
+        }
