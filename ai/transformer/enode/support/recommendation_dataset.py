@@ -12,7 +12,7 @@ class RecommendationDataset(Dataset):
     def __getitem__(self, idx):
         item = self.data[idx]
         return {
-            "user_sequence": torch.tensor(item["user_sequence"], dtype=torch.long),
-            "article_sequence": torch.tensor(item["article_sequence"], dtype=torch.long),
+            "user_category": torch.tensor(item["user_category"], dtype=torch.long),
+            "article_topic": torch.tensor(item["article_topic"], dtype=torch.long),
             "label": torch.tensor(item["label"], dtype=torch.float)
         }

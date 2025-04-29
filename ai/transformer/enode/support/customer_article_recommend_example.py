@@ -21,8 +21,8 @@ def train_model(device, model, dataloader, epochs=10, lr=0.001):
     for epoch in range(epochs):
         total_loss = 0
         for batch in dataloader:
-            user_seq = batch["user_sequence"].to(device)
-            article_seq = batch["article_sequence"].to(device)
+            user_seq = batch["user_category"].to(device)
+            article_seq = batch["article_topic"].to(device)
             labels = batch["label"].to(device)
 
             optimizer.zero_grad()
@@ -34,46 +34,45 @@ def train_model(device, model, dataloader, epochs=10, lr=0.001):
             total_loss += loss.item()
 
         print(f"Epoch {epoch + 1}, Loss: {total_loss / len(dataloader)}")
-
-
-def recommend_articles(device, model, user_sequence, article_sequences, top_n=5):
     model.eval()
-    user_sequence = torch.tensor([user_sequence], dtype=torch.long).to(device)
+
+def recommend_articles(device, model, user_category, article_topics, top_n=5):
+    user_category = torch.tensor([user_category], dtype=torch.long).to(device)
     scores = []
 
-    for article_seq in article_sequences:
+    for article_seq in article_topics:
         article_seq = torch.tensor([article_seq], dtype=torch.long).to(device)
         with torch.no_grad():
-            score = model(user_sequence, article_seq).item()
+            score = model(user_category, article_seq).item()
         scores.append(score)
 
     # 排序並選 Top-N
     top_indices = torch.argsort(torch.tensor(scores), descending=True)[:top_n]
     return top_indices.tolist()
 
-
 def main():
-    #user_sequence:["toy", "food", "pet"]
-    #article_sequence:["toy", "food", "pet", travel]
+    #user_category:["toy", "food", "pet"]
+    #article_topic:["toy", "food", "pet", travel]
+
     data = [
-        {"user_sequence": [1, 1, 0], "article_sequence": [0, 1, 0, 0], "label": 1},
-        {"user_sequence": [1, 1, 0], "article_sequence": [1, 0, 1, 0], "label": 1},
-        {"user_sequence": [1, 1, 0], "article_sequence": [0, 0, 1, 0], "label": 0},
-        {"user_sequence": [0, 1, 1], "article_sequence": [0, 0, 1, 1], "label": 1},
-        {"user_sequence": [0, 1, 1], "article_sequence": [0, 1, 0, 0], "label": 1},
-        {"user_sequence": [0, 1, 1], "article_sequence": [1, 1, 0, 0], "label": 0},
-        {"user_sequence": [0, 1, 1], "article_sequence": [1, 0, 0, 0], "label": 0},
+        {"user_category": [1, 1, 0], "article_topic": [1, 0, 0, 0], "label": 1},
+        {"user_category": [1, 1, 0], "article_topic": [0, 1, 0, 1], "label": 1},
+        {"user_category": [1, 1, 0], "article_topic": [0, 0, 0, 1], "label": 1},
+        {"user_category": [1, 1, 0], "article_topic": [0, 0, 1, 0], "label": 0},
+        {"user_category": [0, 1, 1], "article_topic": [0, 0, 1, 0], "label": 1},
+        {"user_category": [0, 1, 1], "article_topic": [0, 1, 1, 0], "label": 1},
+        {"user_category": [0, 1, 1], "article_topic": [0, 1, 0, 1], "label": 1},
+        {"user_category": [0, 1, 1], "article_topic": [1, 0, 0, 0], "label": 0}
     ]
     dataset = RecommendationDataset(data)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
     device = generate_device()
     model = generate_model(device)
     train_model(device, model, dataloader)
-    user_sequence = [0, 1, 0]
-    article_sequences = [[1, 1, 0, 0], [0, 0, 1, 1], [1, 0, 1, 0]]  # 文章標籤
-    top_articles = recommend_articles(device, model, user_sequence, article_sequences, top_n=2)
+    user_category = [0, 1, 0]
+    article_topics = [[0, 0, 1, 0], [0, 1, 1, 0], [0, 1, 0, 1], [1, 0, 0, 0], [0, 0, 1, 0]]
+    top_articles = recommend_articles(device, model, user_category, article_topics, top_n=2)
     print(f"Recommended article indices: {top_articles}")
-
 
 if __name__ == "__main__":
     main()
