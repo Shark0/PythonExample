@@ -36,10 +36,7 @@ def visualize_dataset(dataset, title, num_images=9):
     plt.tight_layout(rect=[0, 0, 1, 0.95])  # 調整佈局以容納標題
     plt.show()
 
-def main():
+if __name__ == '__main__':
     train_dataset, test_dataset = load_dataset()
     visualize_dataset(train_dataset, 'MNIST Training Dataset Samples')
     visualize_dataset(test_dataset, 'MNIST Test Dataset Samples')
-
-if __name__ == '__main__':
-    main()

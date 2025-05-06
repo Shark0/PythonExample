@@ -4,7 +4,7 @@ from sentence_transformers import (
     SentenceTransformerTrainer,
 )
 from sentence_transformers.losses import MultipleNegativesRankingLoss
-from ai.transformer.enode.sbert.train_sentence_transformer_by_contrastive import get_trained_model
+from ai.model.transformer.enode.sbert.train_sentence_transformer_by_contrastive import get_trained_model
 
 def get_model():
     return SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")

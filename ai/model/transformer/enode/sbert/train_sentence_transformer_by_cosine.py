@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from sentence_transformers import SentenceTransformer, InputExample, losses
 from sentence_transformers.evaluation import EmbeddingSimilarityEvaluator
-from ai.transformer.enode.sbert.erarly_stopping import EarlyStopping
+from ai.model.transformer.enode.sbert.erarly_stopping import EarlyStopping
 
 class Losses(losses.CosineSimilarityLoss):
     def __init__(self, model):
