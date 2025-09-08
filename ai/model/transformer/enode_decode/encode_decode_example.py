@@ -1,19 +1,30 @@
-from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+import torch
+from transformers import MarianTokenizer, MarianMTModel
+import transformers
 
-# 使用支援多語言的 M2M100 模型
-tokenizer = M2M100Tokenizer.from_pretrained("facebook/m2m100_418M")
-model = M2M100ForConditionalGeneration.from_pretrained("facebook/m2m100_418M")
+if __name__ == "__main__":
+    # 使用支援多語言的 M2M100 模型
+    model_name = "Helsinki-NLP/opus-mt-en-zh"
+    tokenizer = MarianTokenizer.from_pretrained(model_name)
+    model = MarianMTModel.from_pretrained(model_name)
 
-# 設定語言對
-tokenizer.src_lang = "en"
-input_text = "Hello, how are you?"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    model.eval()
 
-# 將輸入文字轉為 token ids
-input_ids = tokenizer(input_text, return_tensors="pt").input_ids
+    input_text = "Hello, how are you?"
+    inputs = tokenizer(input_text, return_tensors="pt", padding=True, truncation=True)
+    input_ids = inputs["input_ids"].to(device)
+    attention_mask = inputs["attention_mask"].to(device)
 
-# 翻譯成德文（de）
-generated_tokens = model.generate(input_ids, forced_bos_token_id=tokenizer.get_lang_id("de"))
+    generated_tokens = model.generate(
+        input_ids=input_ids,
+        attention_mask=attention_mask,
+        max_length=50,
+        num_beams=5,
+        early_stopping=True
+    )
 
-# 解碼翻譯文字
-translated_text = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
-print("Translated text:", translated_text)
+    # 解碼翻譯文字
+    translated_text = tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
+    print(f"Translated text: {translated_text}")

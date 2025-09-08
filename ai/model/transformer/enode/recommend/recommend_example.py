@@ -156,8 +156,8 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     # 準備資料
-    print("user0 vector: %s", user_vectors[0])
-    print("article0 vector: %s", article_vectors[0])
+    print("user0 milvus: %s", user_vectors[0])
+    print("article0 milvus: %s", article_vectors[0])
     dataset = LikeDataset(like_records, user_vectors, article_vectors)
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
